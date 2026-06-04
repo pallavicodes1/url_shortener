@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 
 
 dotenv.config();
-const port=process.env.port
+const port=process.env.port || 5000;
 
 connectDB("mongodb://localhost:27017/url_shortener");
 

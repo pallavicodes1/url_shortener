@@ -8,7 +8,9 @@ import get from "./src/routes/url/get.js";
 
 const app=express();
 
-
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
 app.use(cookieParser());
 app.use(express.json());
 app.use('/user',userRouter);
