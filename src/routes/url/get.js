@@ -8,7 +8,6 @@ const RESERVED = new Set(['favicon.ico', 'robots.txt', 'sitemap.xml', 'apple-tou
 export default async function (req, res) {
     try {
         const shortCode = req.params.shortCode;
-
         // Block reserved browser auto-requests
         if (RESERVED.has(shortCode)) {
             return res.status(204).end();
@@ -32,7 +31,6 @@ export default async function (req, res) {
             { $inc: { totalClicks: 1 } },
             { returnDocument: 'before' } // return original doc before update
         );
-
         if (!url) {
             return res.status(404).json({
                 success: false,
@@ -53,7 +51,7 @@ export default async function (req, res) {
 
                 await Analytics.create({
                     urlId: url._id,
-                    country: geo?.country ?? 'unknown',  // ✅ Fix 3: guard null geo
+                    country: geo?.country ?? 'unknown',  
                     browser: result.browser.name,
                     os: result.os.name,
                     device: result.device.type || 'desktop',
