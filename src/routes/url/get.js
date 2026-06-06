@@ -1,36 +1,74 @@
 import ShortUrl from "../../model/shortUrl.js";
 import { UAParser } from "ua-parser-js";
 import geoip from "geoip-lite";
+import Analytics from "../../model/analytics.js";
+
+const RESERVED = new Set(['favicon.ico', 'robots.txt', 'sitemap.xml', 'apple-touch-icon.png']);
+
 export default async function (req, res) {
     try {
         const shortCode = req.params.shortCode;
+
+        // Block reserved browser auto-requests
+        if (RESERVED.has(shortCode)) {
+            return res.status(204).end();
+        }
+
+        // Block Chrome prefetch/prerender
+        const purpose = req.headers['purpose'] || req.headers['sec-purpose'] || '';
+        const fetchDest = req.headers['sec-fetch-dest'] || '';
+        if (purpose.includes('prefetch') || purpose.includes('prerender')) {
+            return res.status(204).end();
+        }
+        if (fetchDest && fetchDest !== 'document') {
+            return res.status(204).end();
+        }
+        if (RESERVED.has(shortCode)) {
+            return res.status(404).end();
+        }
+
         const url = await ShortUrl.findOneAndUpdate(
             { shortCode },
-            { $inc: { totalClicks: 1 } }
+            { $inc: { totalClicks: 1 } },
+            { returnDocument: 'before' } // return original doc before update
         );
 
-        if (url) {
-
-            // let ip = req.ip;
-
-            // const geo = geoip.lookup(ip);
-            // console.log(geo)
-            res.redirect(302, url.originalUrl);
-
-        }
-        else {
+        if (!url) {
             return res.status(404).json({
                 success: false,
                 message: "Short URL not found"
             });
         }
-        // const data=await ShortUrl.findOne({shortCode:req?.params?.shortCode})
+        res.redirect(302, url.originalUrl);
+
+        // Analytics in background — after response is sent
+        setImmediate(async () => {
+            try {
+                let ip = req.ip;
+                if (ip === "::1" || ip === "127.0.0.1") ip = "8.8.8.8";
+
+                const parser = new UAParser(req.headers['user-agent']);
+                const result = parser.getResult();
+                const geo = geoip.lookup(ip);
+
+                await Analytics.create({
+                    urlId: url._id,
+                    country: geo?.country ?? 'unknown',  // ✅ Fix 3: guard null geo
+                    browser: result.browser.name,
+                    os: result.os.name,
+                    device: result.device.type || 'desktop',
+                    clickedAt: Date.now()
+                });
+            } catch (err) {
+                console.error("Analytics error:", err);
+            }
+        });
+
     } catch (error) {
-        console.log(error)
+        console.error(error);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error"
         });
     }
-
 }

@@ -8,26 +8,20 @@ const analyticsSchema = new mongoose.Schema({
 
     country: {
         type: String,
-        required: true,
-        unique: true
-    },
-
-    city: {
-        type: Date,
-        default: null
+       
     },
 
     browser: {
-        type: Date,
-        default: null
+        type: String,
+       
     },
     os: {
-        type: Date,
-        default: null
+        type: String,
+       
     },
     device: {
-        type: Date,
-        default: null
+        type: String,
+       
     },
     clickedAt: {
         type: Date,

@@ -8,6 +8,7 @@ import get from "./src/routes/url/get.js";
 
 const app=express();
 
+app.set('trust proxy', true);
 app.get("/", (req, res) => {
   res.send("Server is running");
 });
@@ -16,6 +17,6 @@ app.use(express.json());
 app.use('/user',userRouter);
 app.use('/url',authenticateToken,urlRouter);
 
-app.get('/:shortCode',authenticateToken,get);
+app.get('/:shortCode',get);
 
 export default app;
