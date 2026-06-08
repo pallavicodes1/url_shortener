@@ -6,21 +6,23 @@ const analyticsSchema = new mongoose.Schema({
         required: true
     },
 
-    country: {
-        type: String,
+    countryCode: {
+        type: String
        
     },
-
+    country:{
+        type:String
+    },
     browser: {
-        type: String,
+        type: String
        
     },
     os: {
-        type: String,
+        type: String
        
     },
     device: {
-        type: String,
+        type: String
        
     },
     clickedAt: {
