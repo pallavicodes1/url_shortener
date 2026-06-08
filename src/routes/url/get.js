@@ -2,11 +2,15 @@ import ShortUrl from "../../model/shortUrl.js";
 import { UAParser } from "ua-parser-js";
 import geoip from "geoip-lite";
 import Analytics from "../../model/analytics.js";
+import countries from "i18n-iso-countries";
+import en from "i18n-iso-countries/langs/en.json" with { type: "json" };
+
 
 const RESERVED = new Set(['favicon.ico', 'robots.txt', 'sitemap.xml', 'apple-touch-icon.png']);
 
 export default async function (req, res) {
     try {
+        countries.registerLocale(en);
         const shortCode = req.params.shortCode;
         // Block reserved browser auto-requests
         if (RESERVED.has(shortCode)) {
@@ -49,9 +53,14 @@ export default async function (req, res) {
                 const result = parser.getResult();
                 const geo = geoip.lookup(ip);
 
+                const countryCode = geo?.country || "Unknown";
+                const countryName =
+                    countries.getName(countryCode, "en") || "Unknown";
+
                 await Analytics.create({
                     urlId: url._id,
-                    country: geo?.country ?? 'unknown',  
+                    countryCode: countryCode,
+                    country:countryName,
                     browser: result.browser.name,
                     os: result.os.name,
                     device: result.device.type || 'desktop',

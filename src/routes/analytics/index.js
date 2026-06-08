@@ -1,5 +1,11 @@
 import express from "express";
-import get from "./get.js";
+import getbycountry from "./getbycountry.js";
+import getbyos from "./getbyos.js";
+import getbybrowser from "./getbybrowser.js";
+import getbydevice from "./getbydevice.js";
 const router=express.Router();
-router.get('/',get);
+router.get('/country/:shortCode',getbycountry);
+router.get('/os/:shortCode',getbyos);
+router.get('/browser/:shortCode',getbybrowser);
+router.get('/device/:shortCode',getbydevice);
 export default router; 

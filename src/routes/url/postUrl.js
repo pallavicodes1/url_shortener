@@ -1,5 +1,6 @@
 import ShortUrl from "../../model/shortUrl.js";
 import { nanoid } from "nanoid";
+
 export default async function (req, res) {
     try {
         let { originalUrl,shortCode } = req.body;
